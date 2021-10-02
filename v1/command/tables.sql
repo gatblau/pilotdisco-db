@@ -16,7 +16,7 @@ DO
 $$
     BEGIN
         ---------------------------------------------------------------------------
-        -- Control (store the various discoverable pilot control services)
+        -- CONTROL (store the various discoverable pilot control services)
         ---------------------------------------------------------------------------
         IF NOT EXISTS(SELECT relname FROM pg_class WHERE relname = 'control')
         THEN
@@ -60,7 +60,7 @@ $$
         END IF;
 
         ---------------------------------------------------------------------------
-        -- Host (store the host information for automated admittance to the allocated pilot control service)
+        -- ADMISSION (store the host information for automated admittance to the allocated pilot control service)
         ---------------------------------------------------------------------------
         IF NOT EXISTS(SELECT relname FROM pg_class WHERE relname = 'admission')
         THEN
