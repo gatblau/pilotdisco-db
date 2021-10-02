@@ -95,12 +95,19 @@ $$
                 admitted          TIMESTAMP(6) WITH TIME ZONE,
                 -- discovered host information (populated upon admittance)
                 host_info         JSONB,
+                -- the foreign key to the pilot control service to use
+                control_id        BIGINT NOT NULL,
                 -- the primary key constraint for the table surrogate key
                 CONSTRAINT admission_id_pk PRIMARY KEY (id),
                 -- forces the host_uuid column to be unique
                 CONSTRAINT admission_host_uuid_uc UNIQUE (host_uuid),
                 -- forces the mac_address_token column to be unique
-                CONSTRAINT admission_mac_address_token_uc UNIQUE (mac_address_token)
+                CONSTRAINT admission_mac_address_token_uc UNIQUE (mac_address_token),
+                -- foreign key to control table
+                CONSTRAINT control_id_fk FOREIGN KEY (control_id)
+                    REFERENCES control (id) MATCH SIMPLE
+                    ON UPDATE NO ACTION
+                    ON DELETE CASCADE
             ) WITH (OIDS = FALSE)
               TABLESPACE pg_default;
 
