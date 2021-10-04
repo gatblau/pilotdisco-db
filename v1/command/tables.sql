@@ -75,13 +75,13 @@ $$
             CREATE TABLE "control_change"
             (
                 -- the type of change
-                operation    CHAR(1)                NOT NULL,
+                operation   CHAR(1)                     NOT NULL,
                 -- the time the change occurred
-                changed      TIMESTAMP              NOT NULL,
+                changed     TIMESTAMP(6) WITH TIME ZONE NOT NULL,
                 -- the control table surrogate key
                 id          BIGINT,
                 -- the name of the pilot control service
-                name        CHARACTER VARYING(100) NOT NULL,
+                name        CHARACTER VARYING(100)      NOT NULL,
                 -- provides additional information about the specific pilot control service
                 description CHARACTER VARYING(250),
                 -- the URI of the pilot control service
@@ -95,13 +95,13 @@ $$
                 -- the salt for the encrypted secrets
                 salt        CHARACTER VARYING(300),
                 -- the version of the record
-                version     BIGINT                 NOT NULL DEFAULT 1,
+                version     BIGINT                      NOT NULL DEFAULT 1,
                 -- when created
-                created     TIMESTAMP(6) WITH TIME ZONE     DEFAULT CURRENT_TIMESTAMP(6),
+                created     TIMESTAMP(6) WITH TIME ZONE          DEFAULT CURRENT_TIMESTAMP(6),
                 -- when last updated
                 updated     TIMESTAMP(6) WITH TIME ZONE,
                 -- who did the change
-                changed_by  CHARACTER VARYING(100) NOT NULL
+                changed_by  CHARACTER VARYING(100)      NOT NULL
             ) WITH (OIDS = FALSE)
               TABLESPACE pg_default;
 
@@ -150,37 +150,37 @@ $$
             CREATE TABLE "admission"
             (
                 -- the control table surrogate key
-                id                BIGINT                 NOT NULL DEFAULT nextval('admission_id_seq'::regclass),
+                id              BIGINT                 NOT NULL DEFAULT nextval('admission_id_seq'::regclass),
                 -- a reference for the admission
-                ref               CHARACTER VARYING(100) NOT NULL,
+                ref             CHARACTER VARYING(100) NOT NULL,
                 -- the mac address for one of the host network interfaces
-                mac_address       CHARACTER VARYING(100) NOT NULL,
+                mac_address     CHARACTER VARYING(100) NOT NULL,
                 -- the host universally unique identifier (populated upon admittance)
-                host_uuid         CHARACTER VARYING(20),
+                host_uuid       CHARACTER VARYING(20),
                 -- the org group to be allocated to the host upon admission
-                org_group         CHARACTER VARYING(50)  NOT NULL,
+                org_group       CHARACTER VARYING(50)  NOT NULL,
                 -- the org to be allocated to the host upon admission
-                org               CHARACTER VARYING(50)  NOT NULL,
+                org             CHARACTER VARYING(50)  NOT NULL,
                 -- the area to be allocated to the host upon admission
-                area              CHARACTER VARYING(50)  NOT NULL,
+                area            CHARACTER VARYING(50)  NOT NULL,
                 -- the location to be allocated to the host upon admission
-                location          CHARACTER VARYING(50)  NOT NULL,
+                location        CHARACTER VARYING(50)  NOT NULL,
                 -- the date the admission has occurred (populated upon admittance)
-                admitted          TIMESTAMP(6) WITH TIME ZONE,
+                admitted        TIMESTAMP(6) WITH TIME ZONE,
                 -- discovered host information (populated upon admittance)
-                host_info         JSONB,
+                host_info       JSONB,
                 -- the foreign key to the pilot control service to use
-                control_id        BIGINT                 NOT NULL,
+                control_id      BIGINT                 NOT NULL,
                 -- the version of the control record used (populated upon admittance)
-                control_version   INT,
+                control_version INT,
                 -- the version of the record
-                version           BIGINT                 NOT NULL DEFAULT 1,
+                version         BIGINT                 NOT NULL DEFAULT 1,
                 -- when created
-                created           TIMESTAMP(6) WITH TIME ZONE     DEFAULT CURRENT_TIMESTAMP(6),
+                created         TIMESTAMP(6) WITH TIME ZONE     DEFAULT CURRENT_TIMESTAMP(6),
                 -- when last updated
-                updated           TIMESTAMP(6) WITH TIME ZONE,
+                updated         TIMESTAMP(6) WITH TIME ZONE,
                 -- who did the change
-                changed_by        CHARACTER VARYING(100) NOT NULL,
+                changed_by      CHARACTER VARYING(100) NOT NULL,
                 -- the primary key constraint for the table surrogate key
                 CONSTRAINT admission_id_pk PRIMARY KEY (id),
                 -- forces the host_uuid column to be unique
@@ -207,41 +207,41 @@ $$
             CREATE TABLE "admission_change"
             (
                 -- the type of change
-                operation    CHAR(1)                NOT NULL,
+                operation       CHAR(1)                     NOT NULL,
                 -- the time the change occurred
-                changed      TIMESTAMP              NOT NULL,
+                changed         TIMESTAMP(6) WITH TIME ZONE NOT NULL,
                 -- the control table surrogate key
-                id                BIGINT                 NOT NULL DEFAULT nextval('admission_id_seq'::regclass),
+                id              BIGINT                      NOT NULL DEFAULT nextval('admission_id_seq'::regclass),
                 -- a reference for the admission
-                ref               CHARACTER VARYING(100),
+                ref             CHARACTER VARYING(100),
                 -- the mac address for one of the host network interfaces
-                mac_address       CHARACTER VARYING(100) NOT NULL,
+                mac_address     CHARACTER VARYING(100)      NOT NULL,
                 -- the host universally unique identifier (populated upon admittance)
-                host_uuid         CHARACTER VARYING(20),
+                host_uuid       CHARACTER VARYING(20),
                 -- the org group to be allocated to the host upon admission
-                org_group         CHARACTER VARYING(50)  NOT NULL,
+                org_group       CHARACTER VARYING(50)       NOT NULL,
                 -- the org to be allocated to the host upon admission
-                org               CHARACTER VARYING(50)  NOT NULL,
+                org             CHARACTER VARYING(50)       NOT NULL,
                 -- the area to be allocated to the host upon admission
-                area              CHARACTER VARYING(50)  NOT NULL,
+                area            CHARACTER VARYING(50)       NOT NULL,
                 -- the location to be allocated to the host upon admission
-                location          CHARACTER VARYING(50)  NOT NULL,
+                location        CHARACTER VARYING(50)       NOT NULL,
                 -- the date the admission has occurred (populated upon admittance)
-                admitted          TIMESTAMP(6) WITH TIME ZONE,
+                admitted        TIMESTAMP(6) WITH TIME ZONE,
                 -- discovered host information (populated upon admittance)
-                host_info         JSONB,
+                host_info       JSONB,
                 -- the foreign key to the pilot control service to use
-                control_id        BIGINT                 NOT NULL,
+                control_id      BIGINT                      NOT NULL,
                 -- the version of the control record used (populated upon admittance)
-                control_version   INT,
+                control_version INT,
                 -- the version of the record
-                version           BIGINT                 NOT NULL DEFAULT 1,
+                version         BIGINT                      NOT NULL DEFAULT 1,
                 -- when created
-                created           TIMESTAMP(6) WITH TIME ZONE     DEFAULT CURRENT_TIMESTAMP(6),
+                created         TIMESTAMP(6) WITH TIME ZONE          DEFAULT CURRENT_TIMESTAMP(6),
                 -- when last updated
-                updated           TIMESTAMP(6) WITH TIME ZONE,
+                updated         TIMESTAMP(6) WITH TIME ZONE,
                 -- who did the change
-                changed_by        CHARACTER VARYING(100) NOT NULL
+                changed_by      CHARACTER VARYING(100)      NOT NULL
             ) WITH (OIDS = FALSE)
               TABLESPACE pg_default;
 
