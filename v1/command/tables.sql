@@ -68,6 +68,71 @@ $$
         END IF;
 
         ---------------------------------------------------------------------------
+        -- CONTROL_CHANGE (change history for control table)
+        ---------------------------------------------------------------------------
+        IF NOT EXISTS(SELECT relname FROM pg_class WHERE relname = 'control_change')
+        THEN
+            CREATE TABLE "control_change"
+            (
+                -- the type of change
+                operation    CHAR(1)                NOT NULL,
+                -- the time the change occurred
+                changed      TIMESTAMP              NOT NULL,
+                -- the control table surrogate key
+                id          BIGINT,
+                -- the name of the pilot control service
+                name        CHARACTER VARYING(100) NOT NULL,
+                -- provides additional information about the specific pilot control service
+                description CHARACTER VARYING(250),
+                -- the URI of the pilot control service
+                uri         CHARACTER VARYING(150),
+                -- the encrypted username to log in the pilot control service
+                username    CHARACTER VARYING(150),
+                -- the encrypted password to log in the pilot control service
+                pwd         CHARACTER VARYING(300),
+                -- the encrypted pgp public key for the pilot control service
+                pub         CHARACTER VARYING(500),
+                -- the salt for the encrypted secrets
+                salt        CHARACTER VARYING(300),
+                -- the version of the record
+                version     BIGINT                 NOT NULL DEFAULT 1,
+                -- when created
+                created     TIMESTAMP(6) WITH TIME ZONE     DEFAULT CURRENT_TIMESTAMP(6),
+                -- when last updated
+                updated     TIMESTAMP(6) WITH TIME ZONE,
+                -- who did the change
+                changed_by  CHARACTER VARYING(100) NOT NULL
+            ) WITH (OIDS = FALSE)
+              TABLESPACE pg_default;
+
+            CREATE OR REPLACE FUNCTION pilotdisco_change_control() RETURNS TRIGGER AS
+            $control_change$
+            BEGIN
+                IF (TG_OP = 'DELETE') THEN
+                    INSERT INTO control_change SELECT 'D', now(), OLD.*;
+                    RETURN OLD;
+                ELSIF (TG_OP = 'UPDATE') THEN
+                    INSERT INTO control_change SELECT 'U', now(), NEW.*;
+                    RETURN NEW;
+                ELSIF (TG_OP = 'INSERT') THEN
+                    INSERT INTO control_change SELECT 'I', now(), NEW.*;
+                    RETURN NEW;
+                END IF;
+                RETURN NULL; -- result is ignored since this is an AFTER trigger
+            END;
+            $control_change$ LANGUAGE plpgsql;
+
+            CREATE TRIGGER control_change
+                AFTER INSERT OR UPDATE OR DELETE
+                ON control
+                FOR EACH ROW
+            EXECUTE PROCEDURE pilotdisco_change_control();
+
+            ALTER TABLE "control_change"
+                OWNER to pilotdisco;
+        END IF;
+
+        ---------------------------------------------------------------------------
         -- ADMISSION (store the host information for automated admittance to the allocated pilot control service)
         ---------------------------------------------------------------------------
         IF NOT EXISTS(SELECT relname FROM pg_class WHERE relname = 'admission')
@@ -86,9 +151,8 @@ $$
             (
                 -- the control table surrogate key
                 id                BIGINT                 NOT NULL DEFAULT nextval('admission_id_seq'::regclass),
-                -- a hashed token identifying the the first mac address of the host to admit
-                -- the hash is made of the mac address and an access token shared between pilot and pilot discovery
-                mac_address_token CHARACTER VARYING(100) NOT NULL,
+                -- the mac address for one of the host network interfaces
+                mac_address       CHARACTER VARYING(100) NOT NULL,
                 -- the host universally unique identifier (populated upon admittance)
                 host_uuid         CHARACTER VARYING(20),
                 -- the org group to be allocated to the host upon admission
@@ -120,7 +184,7 @@ $$
                 -- forces the host_uuid column to be unique
                 CONSTRAINT admission_host_uuid_uc UNIQUE (host_uuid),
                 -- forces the mac_address_token column to be unique
-                CONSTRAINT admission_mac_address_token_uc UNIQUE (mac_address_token),
+                CONSTRAINT admission_mac_address_token_uc UNIQUE (mac_address),
                 -- foreign key to control table
                 CONSTRAINT control_id_fk FOREIGN KEY (control_id)
                     REFERENCES control (id) MATCH SIMPLE
@@ -133,5 +197,75 @@ $$
                 OWNER to pilotdisco;
         END IF;
 
+        ---------------------------------------------------------------------------
+        -- ADMISSION_CHANGE (change history for admission table)
+        ---------------------------------------------------------------------------
+        IF NOT EXISTS(SELECT relname FROM pg_class WHERE relname = 'admission_change')
+        THEN
+            CREATE TABLE "admission_change"
+            (
+                -- the type of change
+                operation    CHAR(1)                NOT NULL,
+                -- the time the change occurred
+                changed      TIMESTAMP              NOT NULL,
+                -- the control table surrogate key
+                id                BIGINT                 NOT NULL DEFAULT nextval('admission_id_seq'::regclass),
+                -- the mac address for one of the host network interfaces
+                mac_address       CHARACTER VARYING(100) NOT NULL,
+                -- the host universally unique identifier (populated upon admittance)
+                host_uuid         CHARACTER VARYING(20),
+                -- the org group to be allocated to the host upon admission
+                org_group         CHARACTER VARYING(50)  NOT NULL,
+                -- the org to be allocated to the host upon admission
+                org               CHARACTER VARYING(50)  NOT NULL,
+                -- the area to be allocated to the host upon admission
+                area              CHARACTER VARYING(50)  NOT NULL,
+                -- the location to be allocated to the host upon admission
+                location          CHARACTER VARYING(50)  NOT NULL,
+                -- the date the admission has occurred (populated upon admittance)
+                admitted          TIMESTAMP(6) WITH TIME ZONE,
+                -- discovered host information (populated upon admittance)
+                host_info         JSONB,
+                -- the foreign key to the pilot control service to use
+                control_id        BIGINT                 NOT NULL,
+                -- the version of the control record used (populated upon admittance)
+                control_version   INT,
+                -- the version of the record
+                version           BIGINT                 NOT NULL DEFAULT 1,
+                -- when created
+                created           TIMESTAMP(6) WITH TIME ZONE     DEFAULT CURRENT_TIMESTAMP(6),
+                -- when last updated
+                updated           TIMESTAMP(6) WITH TIME ZONE,
+                -- who did the change
+                changed_by        CHARACTER VARYING(100) NOT NULL
+            ) WITH (OIDS = FALSE)
+              TABLESPACE pg_default;
+
+            CREATE OR REPLACE FUNCTION pilotdisco_change_admission() RETURNS TRIGGER AS
+            $admission_change$
+            BEGIN
+                IF (TG_OP = 'DELETE') THEN
+                    INSERT INTO admission_change SELECT 'D', now(), OLD.*;
+                    RETURN OLD;
+                ELSIF (TG_OP = 'UPDATE') THEN
+                    INSERT INTO admission_change SELECT 'U', now(), NEW.*;
+                    RETURN NEW;
+                ELSIF (TG_OP = 'INSERT') THEN
+                    INSERT INTO admission_change SELECT 'I', now(), NEW.*;
+                    RETURN NEW;
+                END IF;
+                RETURN NULL; -- result is ignored since this is an AFTER trigger
+            END;
+            $admission_change$ LANGUAGE plpgsql;
+
+            CREATE TRIGGER admission_change
+                AFTER INSERT OR UPDATE OR DELETE
+                ON admission
+                FOR EACH ROW
+            EXECUTE PROCEDURE pilotdisco_change_admission();
+
+            ALTER TABLE "admission_change"
+                OWNER to pilotdisco;
+        END IF;
     END;
 $$
