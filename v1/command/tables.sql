@@ -151,6 +151,8 @@ $$
             (
                 -- the control table surrogate key
                 id                BIGINT                 NOT NULL DEFAULT nextval('admission_id_seq'::regclass),
+                -- a reference for the admission
+                ref               CHARACTER VARYING(100) NOT NULL,
                 -- the mac address for one of the host network interfaces
                 mac_address       CHARACTER VARYING(100) NOT NULL,
                 -- the host universally unique identifier (populated upon admittance)
@@ -210,6 +212,8 @@ $$
                 changed      TIMESTAMP              NOT NULL,
                 -- the control table surrogate key
                 id                BIGINT                 NOT NULL DEFAULT nextval('admission_id_seq'::regclass),
+                -- a reference for the admission
+                ref               CHARACTER VARYING(100),
                 -- the mac address for one of the host network interfaces
                 mac_address       CHARACTER VARYING(100) NOT NULL,
                 -- the host universally unique identifier (populated upon admittance)
